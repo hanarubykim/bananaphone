@@ -15,10 +15,6 @@ union sema{
   int val;
 }
 
-//     If creating (command line argument: -c):
-//         Should make the shared memory, semaphore and
-//         file (open the file with the truncate flag).
-//         Set any values that are needed.
 void creating(){
   printf("Creating the story!\n");
   // Make the shared memory
@@ -33,7 +29,7 @@ void creating(){
     printf("Error! %s\n", strerror(errno));
     return 1;
     }
-  //Make file
+  // Make text file
   int fd = open("a.txt", O_CREAT | O_TRUNC, 0644);
   if(fd == -1){
     printf("Error! %s\n", strerror(errno));
@@ -43,13 +39,29 @@ void creating(){
 }
 
 void removing(){
-
-
+  printf("Removing...\n");
+  // Remove the shared memory, the semaphore, and the story
+  int shmid = shmget(KEY, sizeof(int), 0644);
+  shmctl(smid, IPC_RMID, '\0');
+  // Remove the semaphore
+  int ridsema = semget(KEY, 1, 0644);
+  semctl(ridsema, 0, IPC_RMID);
+  // Display the story
+  viewing();
+  // Remove the story
+  remove("a.txt");
 }
 
 void viewing(){
-
+  // Output the contents of the story file.
+  printf("Story Time!\n");
+  int fd = open("a.txt", O_RDONLY);
+  char * text = calloc(sizeof(char), 10000);
+  read(fd, text, 10000);
+  printf("Story Time!\n%s", text);
+  free(text);
 }
+
 int main(){
   char *line = calloc(100, sizeof(char));
   printf("Enter a command!/n");
@@ -68,18 +80,5 @@ int main(){
   else{
     printf("Woopsie daisies! Try something different./n");
   }
-
-
-
   return 0;
 }
-
-//     If removing (command line argument: -r)
-//
-//         Remove the shared memory, the semaphore and the story.
-//         Display the full contents of the story.
-//         This should wait until the semaphore is available.
-//
-//     If viewing (command line argument: -v)
-//         Output the contents of the story file.
-//         This mode does not need to interact with the semaphore
