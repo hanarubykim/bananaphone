@@ -38,6 +38,15 @@ void creating(){
   return 0;
 }
 
+void viewing(){
+  // Output the contents of the story file.
+  int fd = open("a.txt", O_RDONLY);
+  char * text = calloc(sizeof(char), 10000);
+  read(fd, text, 10000);
+  printf("Story Time!\n%s", text);
+  free(text);
+}
+
 void removing(){
   printf("Removing...\n");
   // Remove the shared memory, the semaphore, and the story
@@ -50,16 +59,6 @@ void removing(){
   viewing();
   // Remove the story
   remove("a.txt");
-}
-
-void viewing(){
-  // Output the contents of the story file.
-  printf("Story Time!\n");
-  int fd = open("a.txt", O_RDONLY);
-  char * text = calloc(sizeof(char), 10000);
-  read(fd, text, 10000);
-  printf("Story Time!\n%s", text);
-  free(text);
 }
 
 int main(){
