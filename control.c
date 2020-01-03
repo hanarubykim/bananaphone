@@ -11,9 +11,13 @@
 #include <fcntl.h>
 
 #define KEY 24601
-union sema{
-  int val;
-}
+
+union semun {
+  int                 val;      /*  Value for SETVAL                */
+  struct semid_ds    *buf;      /*  Buffer for IPC_STAT, IPC_SET    */
+  unsigned short     *array;    /*  Array for GETALL, SETALL        */
+  struct seminfo     *__buf;    /*  Buffer for IPC_INFO             */
+};
 
 void creating(){
   printf("Creating the story!\n");
@@ -22,7 +26,7 @@ void creating(){
   // Make the semaphore
   int semid = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0644);
   // Set semaphore values
-  sema s;
+  union semun s;
   s.val = 1;
   int stat = semctl(semid, 0, SETVAL, s);
   if(stat == -1){
@@ -49,14 +53,20 @@ void viewing(){
 
 void removing(){
   printf("Removing...\n");
+  int ridsema = semget(KEY, 1, 0644);
+  struct sembuf* temp = calloc(sizeof(struct sembuf), 1);
+  temp->sem_num = 0;
+  temp->sem_op = -1;
+  temp->sem_flg = SEM_UNDO;
+  int stat = semop(ridsema, temp, 1);
+  free(temp);
+  // Display the story
+  viewing();
   // Remove the shared memory, the semaphore, and the story
   int shmid = shmget(KEY, sizeof(int), 0644);
   shmctl(smid, IPC_RMID, '\0');
   // Remove the semaphore
-  int ridsema = semget(KEY, 1, 0644);
   semctl(ridsema, 0, IPC_RMID);
-  // Display the story
-  viewing();
   // Remove the story
   remove("a.txt");
 }
