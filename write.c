@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys.ipc.h>
+#include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
-#include <fnctl.h>
+#include <fcntl.h>
+#include <string.h>
 
 #define KEY 24602
 
@@ -49,7 +50,7 @@ int main(){
   write(fd, toAdd, nextLineLen);
 
   // Update the shared memory
-  d[0] = nextLineLength;
+  d[0] = nextLineLen;
 
   // Release the semaphore
   s->sem_op = 1;

@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
-#include <sys.ipc.h>
+#include <sys/ipc.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -19,7 +19,7 @@ union semun {
   struct seminfo     *__buf;    /*  Buffer for IPC_INFO             */
 };
 
-void creating(){
+int creating(){
   printf("Creating the story!\n");
   // Make the shared memory
   int shmid = shmget(KEY, sizeof(int), 0644 | IPC_CREAT);
@@ -39,7 +39,6 @@ void creating(){
     printf("Error! %s\n", strerror(errno));
     return 1;
   }
-  return 0;
 }
 
 void viewing(){
@@ -64,7 +63,7 @@ void removing(){
   viewing();
   // Remove the shared memory, the semaphore, and the story
   int shmid = shmget(KEY, sizeof(int), 0644);
-  shmctl(smid, IPC_RMID, '\0');
+  shmctl(shmid, IPC_RMID, '\0');
   // Remove the semaphore
   semctl(ridsema, 0, IPC_RMID);
   // Remove the story
@@ -73,9 +72,9 @@ void removing(){
 
 int main(){
   char *line = calloc(100, sizeof(char));
-  printf("Enter a command!/n");
+  printf("Enter a command!\n");
   fgets(line, 1000, stdin);
-  line[strlen(line) - 1] = '/0';
+  line[strlen(line) - 1] = '\0';
 
   if(strcmp(line, "-c") == 0){
     creating();
